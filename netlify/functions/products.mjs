@@ -19,19 +19,21 @@ export default async function handler() {
 
     return Response.json({
       success: true,
-      products: products
+      products
     });
 
   } catch (error) {
-    console.error("DATABASE ERROR:", error);
+    console.error(error);
 
     return Response.json(
       {
         success: false,
-        products: [],
-        error: error.message
+        error: error.message,
+        products: []
       },
-      { status: 500 }
+      {
+        status: 500
+      }
     );
   }
 }
