@@ -5,34 +5,37 @@ export default async function handler() {
     const db = getDatabase();
 
     const products = await db.sql`
-      SELECT
-        id,
-        name,
-        category,
-        price,
-        old_price,
-        image,
-        stock
-      FROM products
+      SELECT * FROM products
       ORDER BY id ASC
     `;
 
-    return Response.json({
-      success: true,
-      products
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        products: products
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
   } catch (error) {
-    console.error(error);
+    console.error("DB ERROR:", error);
 
-    return Response.json(
-      {
+    return new Response(
+      JSON.stringify({
         success: false,
-        error: error.message,
-        products: []
-      },
+        products: [],
+        error: error.message
+      }),
       {
-        status: 500
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
     );
   }
