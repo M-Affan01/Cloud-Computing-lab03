@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>NOVA Store</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#080808;
+  color:#fff;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:20px 7%;
+  background:#111;
+  border-bottom:1px solid #292929;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:25px;
+  font-weight:900;
+}
+
+.logo span{
+  color:#d9ff3f;
+}
+
+nav a{
+  color:#aaa;
+  text-decoration:none;
+  margin-left:25px;
+}
+
+nav a:hover{
+  color:#d9ff3f;
+}
+
+.hero{
+  min-height:500px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:60px 20px;
+  background:
+    radial-gradient(
+      circle,
+      #293500,
+      #080808 65%
+    );
+}
+
+.hero h1{
+  font-size:clamp(50px,9vw,100px);
+  line-height:.9;
+}
+
+.hero h1 span{
+  color:#d9ff3f;
+}
+
+.hero p{
+  max-width:550px;
+  color:#999;
+  line-height:1.7;
+  margin:25px auto;
+}
+
+.btn{
+  border:0;
+  padding:14px 22px;
+  background:#d9ff3f;
+  color:#000;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+}
+
+section{
+  padding:80px 7%;
+}
+
+.title{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.title h2{
+  font-size:42px;
+}
+
+.title p{
+  color:#777;
+  margin-top:10px;
+}
+
+.products{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:20px;
+}
+
+.product{
+  background:#151515;
+  border:1px solid #292929;
+  border-radius:18px;
+  overflow:hidden;
+  transition:.3s;
+}
+
+.product:hover{
+  transform:translateY(-7px);
+  border-color:#d9ff3f;
+}
+
+.product img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+}
+
+.info{
+  padding:18px;
+}
+
+.category{
+  color:#777;
+  font-size:12px;
+}
+
+.info h3{
+  margin:8px 0;
+}
+
+.price{
+  color:#d9ff3f;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.info button{
+  width:100%;
+  margin-top:15px;
+}
+
+.cart-button{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:30;
+  background:#d9ff3f;
+  color:#000;
+  border:0;
+  border-radius:50px;
+  padding:15px 22px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.box{
+  background:#151515;
+  width:min(550px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:30px;
+  border-radius:20px;
+  border:1px solid #333;
+}
+
+.box-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.close{
+  width:35px;
+  height:35px;
+  border:0;
+  background:#292929;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.field{
+  margin-bottom:15px;
+}
+
+.field label{
+  display:block;
+  color:#aaa;
+  font-size:12px;
+  margin-bottom:7px;
+}
+
+.field input,
+.field textarea{
+  width:100%;
+  background:#0c0c0c;
+  border:1px solid #333;
+  border-radius:9px;
+  padding:13px;
+  color:#fff;
+  outline:none;
+}
+
+.field textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus{
+  border-color:#d9ff3f;
+}
+
+.summary{
+  background:#0c0c0c;
+  padding:15px;
+  border-radius:12px;
+  margin:20px 0;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  padding:7px 0;
+  color:#aaa;
+  font-size:13px;
+}
+
+.total{
+  border-top:1px solid #333;
+  margin-top:10px;
+  padding-top:12px;
+  display:flex;
+  justify-content:space-between;
+  font-size:19px;
+  font-weight:bold;
+}
+
+.total span:last-child{
+  color:#d9ff3f;
+}
+
+.message{
+  display:none;
+  text-align:center;
+  padding:30px 0;
+}
+
+.message.show{
+  display:block;
+}
+
+.success{
+  color:#d9ff3f;
+  font-size:50px;
+  margin-bottom:15px;
+}
+
+footer{
+  border-top:1px solid #292929;
+  text-align:center;
+  color:#666;
+  padding:40px;
+}
+
+.loading{
+  grid-column:1/-1;
+  text-align:center;
+  color:#777;
+  padding:60px;
+}
+
+@media(max-width:900px){
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:600px){
+
+  nav{
+    display:none;
+  }
+
+  section{
+    padding:60px 15px;
+  }
+
+  .products{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .product img{
+    height:190px;
+  }
+
+  .info{
+    padding:12px;
+  }
+
+  .info h3{
+    font-size:14px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<header>
+
+  <div class="logo">
+    NO<span>VA</span>
+  </div>
+
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#shop">Shop</a>
+    <a href="#about">About</a>
+  </nav>
+
+</header>
+
+
+<section class="hero" id="home">
+
+  <div>
+
+    <h1>
+      DESIGNED<br>
+      TO <span>MOVE.</span>
+    </h1>
+
+    <p>
+      Premium products for modern living.
+      Simple, stylish and built for everyday life.
+    </p>
+
+    <a href="#shop">
+      <button class="btn">
+        Shop Now →
+      </button>
+    </a>
+
+  </div>
+
+</section>
+
+
+<section id="shop">
+
+  <div class="title">
+
+    <h2>Our Products</h2>
+
+    <p>
+      Products are loaded directly from Netlify Database.
+    </p>
+
+  </div>
+
+
+  <div
+    class="products"
+    id="products"
+  >
+
+    <div class="loading">
+      Loading products...
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="about">
+
+  <div class="title">
+
+    <h2>About NOVA</h2>
+
+    <p>
+      A basic ecommerce website powered by
+      Netlify Functions and PostgreSQL.
+    </p>
+
+  </div>
+
+</section>
+
+
+<button
+  class="cart-button"
+  onclick="openCheckout()"
+>
+
+  🛒 Cart
+  (<span id="cartCount">0</span>)
+
+</button>
+
+
+<div
+  class="modal"
+  id="modal"
+>
+
+  <div class="box">
+
+    <div class="box-head">
+
+      <h2>Checkout</h2>
+
+      <button
+        class="close"
+        onclick="closeCheckout()"
+      >
+        ✕
+      </button>
+
+    </div>
+
+
+    <form id="orderForm">
+
+      <div class="field">
+
+        <label>
+          FULL NAME
+        </label>
+
+        <input
+          id="customerName"
+          required
+          placeholder="Your name"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          EMAIL
+        </label>
+
+        <input
+          id="customerEmail"
+          type="email"
+          required
+          placeholder="you@example.com"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          PHONE
+        </label>
+
+        <input
+          id="customerPhone"
+          required
+          placeholder="03001234567"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          ADDRESS
+        </label>
+
+        <textarea
+          id="customerAddress"
+          required
+          placeholder="Delivery address"
+        ></textarea>
+
+      </div>
+
+
+      <div
+        class="summary"
+        id="summary"
+      ></div>
+
+
+      <button
+        class="btn"
+        style="width:100%"
+        type="submit"
+      >
+        Place Order →
+      </button>
+
+    </form>
+
+
+    <div
+      class="message"
+      id="successMessage"
+    >
+
+      <div class="success">
+        ✓
+      </div>
+
+      <h2>
+        Order Saved!
+      </h2>
+
+      <p
+        style="
+          color:#777;
+          margin-top:10px;
+        "
+      >
+        Your order has been saved
+        to the database.
+      </p>
+
+      <button
+        class="btn"
+        style="margin-top:20px"
+        onclick="closeCheckout()"
+      >
+        Continue Shopping
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<footer>
+
+  © 2026 NOVA — Premium Store
+
+</footer>
+
+
+<script>
+
+let products = [];
+
+let cart = [];
+
+
+/* LOAD PRODUCTS FROM DATABASE */
+
+async function loadProducts(){
+
+  try{
+
+    const response =
+      await fetch(
+        "/.netlify/functions/products"
+      );
+
+    const data =
+      await response.json();
+
+    if(!data.success){
+
+      throw new Error(
+        "Products could not load"
+      );
+
+    }
+
+    products =
+      data.products;
+
+    renderProducts();
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById("products")
+      .innerHTML = `
+
+        <div class="loading">
+
+          Could not load products.
+
+          <br><br>
+
+          Check your Netlify Database
+          deployment.
+
+        </div>
+
+      `;
+
+  }
+
+}
+
+
+/* RENDER PRODUCTS */
+
+function renderProducts(){
+
+  const container =
+    document.getElementById("products");
+
+  container.innerHTML =
+    products.map(product => `
+
+      <article class="product">
+
+        <img
+          src="${product.image}"
+          alt="${product.name}"
+        >
+
+        <div class="info">
+
+          <div class="category">
+            ${product.category}
+          </div>
+
+          <h3>
+            ${product.name}
+          </h3>
+
+          <div class="price">
+            $${Number(product.price).toFixed(2)}
+          </div>
+
+          <button
+            class="btn"
+            onclick="addToCart(${product.id})"
+          >
+            Add to Cart
+          </button>
+
+        </div>
+
+      </article>
+
+    `).join("");
+
+}
+
+
+/* ADD CART */
+
+function addToCart(productId){
+
+  const product =
+    products.find(
+      p => p.id === productId
+    );
+
+  if(!product) return;
+
+
+  const existing =
+    cart.find(
+      item => item.productId === productId
+    );
+
+
+  if(existing){
+
+    existing.quantity++;
+
+  }else{
+
+    cart.push({
+
+      productId:product.id,
+
+      name:product.name,
+
+      price:Number(product.price),
+
+      quantity:1
+
+    });
+
+  }
+
+
+  updateCart();
+
+  alert(
+    product.name +
+    " added to cart!"
+  );
+
+}
+
+
+/* CART COUNT */
+
+function updateCart(){
+
+  const count =
+    cart.reduce(
+      (sum,item) =>
+        sum + item.quantity,
+      0
+    );
+
+  document.getElementById(
+    "cartCount"
+  ).textContent = count;
+
+}
+
+
+/* CHECKOUT */
+
+function openCheckout(){
+
+  if(cart.length === 0){
+
+    alert(
+      "Your cart is empty."
+    );
+
+    return;
+
+  }
+
+
+  renderSummary();
+
+
+  document.getElementById(
+    "modal"
+  ).classList.add("show");
+
+}
+
+
+function closeCheckout(){
+
+  document.getElementById(
+    "modal"
+  ).classList.remove("show");
+
+}
+
+
+/* SUMMARY */
+
+function renderSummary(){
+
+  const summary =
+    document.getElementById(
+      "summary"
+    );
+
+
+  let total = 0;
+
+
+  summary.innerHTML =
+    cart.map(item => {
+
+      const itemTotal =
+        item.price *
+        item.quantity;
+
+
+      total += itemTotal;
+
+
+      return `
+
+        <div class="row">
+
+          <span>
+            ${item.name}
+            × ${item.quantity}
+          </span>
+
+          <strong>
+            $${itemTotal.toFixed(2)}
+          </strong>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+
+  summary.innerHTML += `
+
+    <div class="total">
+
+      <span>
+        Total
+      </span>
+
+      <span>
+        $${total.toFixed(2)}
+      </span>
+
+    </div>
+
+  `;
+
+}
+
+
+/* PLACE ORDER */
+
+document
+  .getElementById("orderForm")
+  .addEventListener(
+    "submit",
+    async function(event){
+
+      event.preventDefault();
+
+
+      const button =
+        this.querySelector(
+          "button[type=submit]"
+        );
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Saving Order...";
+
+
+      try{
+
+        const response =
+          await fetch(
+            "/.netlify/functions/orders",
+            {
+
+              method:"POST",
+
+              headers:{
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:JSON.stringify({
+
+                name:
+                  document
+                    .getElementById(
+                      "customerName"
+                    )
+                    .value,
+
+                email:
+                  document
+                    .getElementById(
+                      "customerEmail"
+                    )
+                    .value,
+
+                phone:
+                  document
+                    .getElementById(
+                      "customerPhone"
+                    )
+                    .value,
+
+                address:
+                  document
+                    .getElementById(
+                      "customerAddress"
+                    )
+                    .value,
+
+                items:
+                  cart.map(item => ({
+
+                    productId:
+                      item.productId,
+
+                    quantity:
+                      item.quantity
+
+                  }))
+
+              })
+
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if(!response.ok){
+
+          throw new Error(
+            result.error ||
+            "Order failed"
+          );
+
+        }
+
+
+        /*
+          SUCCESS
+        */
+
+        document
+          .getElementById(
+            "orderForm"
+          )
+          .style.display = "none";
+
+
+        document
+          .getElementById(
+            "successMessage"
+          )
+          .classList.add("show");
+
+
+        cart = [];
+
+        updateCart();
+
+
+      }catch(error){
+
+        alert(
+          error.message
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+          "Place Order →";
+
+      }
+
+    }
+  );
+
+
+/* START */
+
+loadProducts();
+
+</script>
+
+</body>
+
+</html>
