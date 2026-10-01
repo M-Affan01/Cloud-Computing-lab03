@@ -610,54 +610,75 @@ let cart = [];
 
 /* LOAD PRODUCTS FROM DATABASE */
 
-async function loadProducts(){
+async function loadProducts() {
+  const container = document.getElementById("products");
 
-  try{
+  try {
+    const response = await fetch("/.netlify/functions/products");
 
-    const response =
-      await fetch(
-        "/.netlify/functions/products"
-      );
+    console.log("HTTP STATUS:", response.status);
 
-    const data =
-      await response.json();
+    const raw = await response.text();
 
-    if(!data.success){
+    console.log("RAW RESPONSE:", raw);
 
+    if (!raw.trim()) {
       throw new Error(
-        "Products could not load"
+        "Netlify Function returned an empty response."
       );
-
     }
 
-    products =
-      data.products;
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch (jsonError) {
+      throw new Error(
+        "Server returned invalid JSON: " + raw.substring(0, 300)
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Server error"
+      );
+    }
+
+    if (!Array.isArray(data.products)) {
+      throw new Error(
+        "Products data is not an array."
+      );
+    }
+
+    products = data.products;
 
     renderProducts();
 
-  }catch(error){
+  } catch (error) {
 
-    console.error(error);
+    console.error("PRODUCT LOAD ERROR:", error);
 
-    document.getElementById("products")
-      .innerHTML = `
+    container.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        padding:50px;
+        text-align:center;
+        color:#ff7070;
+      ">
+        <h3>Database Connection Error</h3>
 
-        <div class="loading">
+        <p style="margin-top:10px;color:#aaa">
+          ${error.message}
+        </p>
 
-          Could not load products.
-
-          <br><br>
-
-          Check your Netlify Database
-          deployment.
-
-        </div>
-
-      `;
-
+        <p style="margin-top:15px;color:#666;font-size:12px">
+          Open browser Console (F12) for details.
+        </p>
+      </div>
+    `;
   }
-
 }
+
 
 
 /* RENDER PRODUCTS */
