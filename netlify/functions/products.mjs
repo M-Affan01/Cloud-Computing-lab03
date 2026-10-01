@@ -4,7 +4,7 @@ export default async function handler() {
   try {
     const db = getDatabase();
 
-    const result = await db.sql`
+    const products = await db.sql`
       SELECT
         id,
         name,
@@ -17,34 +17,21 @@ export default async function handler() {
       ORDER BY id ASC
     `;
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        products: result.rows
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    return Response.json({
+      success: true,
+      products: products
+    });
 
   } catch (error) {
+    console.error("DATABASE ERROR:", error);
 
-    console.error(error);
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: "Could not load products"
-      }),
+    return Response.json(
       {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
+        success: false,
+        products: [],
+        error: error.message
+      },
+      { status: 500 }
     );
   }
 }
