@@ -3,18 +3,12 @@ import { getDatabase } from "@netlify/database";
 export default async function handler(request) {
 
   if (request.method !== "POST") {
-
-    return new Response(
-      JSON.stringify({
+    return Response.json(
+      {
         success: false,
         error: "POST request required"
-      }),
-      {
-        status: 405,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
+      },
+      { status: 405 }
     );
   }
 
@@ -38,139 +32,143 @@ export default async function handler(request) {
       !Array.isArray(items) ||
       items.length === 0
     ) {
-
-      return new Response(
-        JSON.stringify({
+      return Response.json(
+        {
           success: false,
           error: "Missing order information"
-        }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
+        },
+        { status: 400 }
       );
     }
 
     const db = getDatabase();
 
-    /*
-      Calculate total on the server
-      instead of trusting the browser.
-    */
-
     let total = 0;
+    const checkedProducts = [];
+
+    /*
+     * Check products and calculate total
+     */
 
     for (const item of items) {
 
-      const productResult = await db.sql`
-        SELECT id, name, price, stock
-        FROM products
-        WHERE id = ${Number(item.productId)}
-      `;
-
-      if (productResult.rows.length === 0) {
-
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: `Product ${item.productId} not found`
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        );
-      }
-
-      const product = productResult.rows[0];
-
+      const productId = Number(item.productId);
       const quantity = Number(item.quantity);
 
       if (
+        !Number.isInteger(productId) ||
         !Number.isInteger(quantity) ||
         quantity < 1
       ) {
-
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Invalid quantity"
-          }),
+        return Response.json(
           {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
+            success: false,
+            error: "Invalid product or quantity"
+          },
+          { status: 400 }
         );
       }
 
-      if (product.stock < quantity) {
+      const products = await db.sql`
+        SELECT
+          id,
+          name,
+          price,
+          stock
+        FROM products
+        WHERE id = ${productId}
+      `;
 
-        return new Response(
-          JSON.stringify({
+      if (products.length === 0) {
+        return Response.json(
+          {
+            success: false,
+            error: "Product not found"
+          },
+          { status: 404 }
+        );
+      }
+
+      const product = products[0];
+
+      if (Number(product.stock) < quantity) {
+        return Response.json(
+          {
             success: false,
             error: `${product.name} is out of stock`
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
+          },
+          { status: 400 }
         );
       }
 
-      total += Number(product.price) * quantity;
+      total +=
+        Number(product.price) * quantity;
+
+      checkedProducts.push({
+        product,
+        quantity
+      });
     }
 
     /*
-      Create customer
-    */
+     * Create customer
+     */
 
-    const customerResult = await db.sql`
+    const customerRows = await db.sql`
       INSERT INTO customers
-      (name, email, phone, address)
+      (
+        name,
+        email,
+        phone,
+        address
+      )
       VALUES
-      (${name}, ${email}, ${phone}, ${address})
+      (
+        ${name},
+        ${email},
+        ${phone},
+        ${address}
+      )
       RETURNING id
     `;
 
-    const customerId = customerResult.rows[0].id;
+    const customerId =
+      customerRows[0].id;
 
     /*
-      Create order
-    */
+     * Create order
+     */
 
-    const orderResult = await db.sql`
+    const orderRows = await db.sql`
       INSERT INTO orders
-      (customer_id, total, status)
+      (
+        customer_id,
+        total,
+        status
+      )
       VALUES
-      (${customerId}, ${total.toFixed(2)}, 'pending')
-      RETURNING id, total, status, created_at
+      (
+        ${customerId},
+        ${total.toFixed(2)},
+        'pending'
+      )
+      RETURNING
+        id,
+        total,
+        status,
+        created_at
     `;
 
-    const order = orderResult.rows[0];
+    const order = orderRows[0];
 
     /*
-      Save order items + decrease stock
-    */
+     * Save order items
+     */
 
-    for (const item of items) {
+    for (const item of checkedProducts) {
 
-      const productResult = await db.sql`
-        SELECT id, name, price
-        FROM products
-        WHERE id = ${Number(item.productId)}
-      `;
-
-      const product = productResult.rows[0];
-
-      const quantity = Number(item.quantity);
+      const product = item.product;
+      const quantity = item.quantity;
 
       await db.sql`
         INSERT INTO order_items
@@ -198,35 +196,28 @@ export default async function handler(request) {
       `;
     }
 
-    return new Response(
-      JSON.stringify({
+    return Response.json(
+      {
         success: true,
         message: "Order created successfully",
-        order
-      }),
-      {
-        status: 201,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
+        order: order
+      },
+      { status: 201 }
     );
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "ORDER DATABASE ERROR:",
+      error
+    );
 
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: "Server error while creating order"
-      }),
+    return Response.json(
       {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
+        success: false,
+        error: error.message
+      },
+      { status: 500 }
     );
   }
 }
