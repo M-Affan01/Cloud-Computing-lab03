@@ -1,7 +1,6 @@
 {
     "name": "nova-store",
     "version": "1.0.0",
-    "private": true,
     "type": "module",
     "scripts": {
       "build": "echo \"NOVA build complete\""
